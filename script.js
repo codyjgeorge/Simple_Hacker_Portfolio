@@ -313,7 +313,12 @@ async function fetchMonkeyTypeStats() {
         for (let endpoint of apiEndpoints) {
             try {
                 console.log(`Trying endpoint: ${endpoint}`);
-                response = await fetch(endpoint);
+                response = await fetch(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 if (response.ok) {
                     console.log(`API call successful with endpoint: ${endpoint}`);
                     success = true;
