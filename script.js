@@ -284,23 +284,36 @@ async function fetchMonkeyTypeStats() {
     const wpmElement = document.getElementById('monkeytype-wpm');
     const accuracyElement = document.getElementById('monkeytype-accuracy');
     
-    if (!wpmElement || !accuracyElement) return;
+    console.log('Fetching MonkeyType stats...');
+    console.log('WPM Element:', wpmElement);
+    console.log('Accuracy Element:', accuracyElement);
+    
+    if (!wpmElement || !accuracyElement) {
+        console.log('MonkeyType elements not found, aborting fetch');
+        return;
+    }
     
     try {
+        console.log('Making API request to MonkeyType...');
         // Fetch user stats from MonkeyType API
         const response = await fetch(`https://api.monkeytype.com/v1/users/profile?username=${username}`);
         
+        console.log('API Response status:', response.status);
+        
         if (!response.ok) {
-            throw new Error('Failed to fetch MonkeyType stats');
+            throw new Error(`Failed to fetch MonkeyType stats: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('API Data received:', data);
         
         // Extract the highest WPM and accuracy from personal bests
         if (data.data && data.data.personalBests) {
             const timeModes = data.data.personalBests.time;
             let highestWpm = 83; // Fallback to your current high
             let highestAccuracy = 0;
+            
+            console.log('Time modes found:', Object.keys(timeModes));
             
             // Check different time modes for highest WPM and accuracy
             Object.values(timeModes).forEach(mode => {
@@ -314,6 +327,9 @@ async function fetchMonkeyTypeStats() {
                 }
             });
             
+            console.log('Highest WPM found:', highestWpm);
+            console.log('Highest Accuracy found:', highestAccuracy);
+            
             // Update the displays with animation
             animateNumber(wpmElement, parseInt(wpmElement.textContent), highestWpm);
             
@@ -322,9 +338,12 @@ async function fetchMonkeyTypeStats() {
                 const currentAccuracy = accuracyElement.textContent === '--' ? 0 : parseFloat(accuracyElement.textContent);
                 animateNumber(accuracyElement, currentAccuracy, highestAccuracy, true);
             }
+        } else {
+            console.log('No personal bests data found in API response');
         }
     } catch (error) {
         console.log('MonkeyType API error:', error);
+        console.log('Error details:', error.message);
         // Keep the current values if API fails
     }
 }
@@ -355,9 +374,36 @@ function animateNumber(element, startValue, endValue, isDecimal = false) {
 }
 
 // Fetch MonkeyType stats when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure elements exist before trying to fetch
+    const wpmElement = document.getElementById('monkeytype-wpm');
+    const accuracyElement = document.getElementById('monkeytype-accuracy');
+    
+    if (wpmElement && accuracyElement) {
+        // Delay the API call to avoid overwhelming the server
+        setTimeout(fetchMonkeyTypeStats, 2000);
+    } else {
+        console.log('MonkeyType elements not found, retrying...');
+        // Retry after a short delay in case DOM is still loading
+        setTimeout(() => {
+            const retryWpmElement = document.getElementById('monkeytype-wpm');
+            const retryAccuracyElement = document.getElementById('monkeytype-accuracy');
+            if (retryWpmElement && retryAccuracyElement) {
+                fetchMonkeyTypeStats();
+            }
+        }, 1000);
+    }
+});
+
+// Also try on window load as backup
 window.addEventListener('load', function() {
-    // Delay the API call to avoid overwhelming the server
-    setTimeout(fetchMonkeyTypeStats, 2000);
+    const wpmElement = document.getElementById('monkeytype-wpm');
+    const accuracyElement = document.getElementById('monkeytype-accuracy');
+    
+    if (wpmElement && accuracyElement && wpmElement.textContent === '83') {
+        // Only fetch if we still have the default value
+        setTimeout(fetchMonkeyTypeStats, 3000);
+    }
 });
 
 // Add some terminal-style console messages
