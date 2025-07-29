@@ -300,11 +300,12 @@ async function fetchMonkeyTypeStats() {
         let response;
         let apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
         
-        // Try different API endpoints
+        // Try different API endpoints (updated based on current MonkeyType API)
         const apiEndpoints = [
-            `https://api.monkeytype.com/v1/users/profile?username=${username}`,
             `https://api.monkeytype.com/v1/users/${username}`,
-            `https://api.monkeytype.com/v1/users/profile/${username}`
+            `https://api.monkeytype.com/v1/users/${username}/profile`,
+            `https://api.monkeytype.com/v1/users/profile?username=${username}`,
+            `https://api.monkeytype.com/v1/users/${username}/personal-bests`
         ];
         
         let success = false;
@@ -375,12 +376,32 @@ async function fetchMonkeyTypeStats() {
         const data = await response.json();
         console.log('API Data received:', data);
         
-        // Extract the highest WPM and accuracy from personal bests
+        // Try different data structures that MonkeyType API might return
+        let personalBests = null;
+        let userData = null;
+        
+        // Check various possible data structures
         if (data.data && data.data.personalBests) {
-            const timeModes = data.data.personalBests.time;
-            let highestWpm = 83; // Fallback to your current high
-            let highestAccuracy = 0;
-            
+            personalBests = data.data.personalBests;
+            userData = data.data;
+        } else if (data.personalBests) {
+            personalBests = data.personalBests;
+            userData = data;
+        } else if (data.data) {
+            userData = data.data;
+        } else if (data) {
+            userData = data;
+        }
+        
+        console.log('Personal bests found:', personalBests);
+        console.log('User data found:', userData);
+        
+        let highestWpm = 83; // Fallback to your current high
+        let highestAccuracy = 0;
+        
+        // Extract stats from personal bests if available
+        if (personalBests && personalBests.time) {
+            const timeModes = personalBests.time;
             console.log('Time modes found:', Object.keys(timeModes));
             
             // Check different time modes for highest WPM and accuracy
@@ -394,20 +415,28 @@ async function fetchMonkeyTypeStats() {
                     }
                 }
             });
-            
-            console.log('Highest WPM found:', highestWpm);
-            console.log('Highest Accuracy found:', highestAccuracy);
-            
-            // Update the displays with animation
-            animateNumber(wpmElement, parseInt(wpmElement.textContent), highestWpm);
-            
-            // Only update accuracy if we found a value greater than 0
-            if (highestAccuracy > 0) {
-                const currentAccuracy = accuracyElement.textContent === '--' ? 0 : parseFloat(accuracyElement.textContent);
-                animateNumber(accuracyElement, currentAccuracy, highestAccuracy, true);
+        }
+        
+        // Also check for stats in user data
+        if (userData) {
+            if (userData.personalBests && userData.personalBests.wpm > highestWpm) {
+                highestWpm = userData.personalBests.wpm;
             }
-        } else {
-            console.log('No personal bests data found in API response');
+            if (userData.personalBests && userData.personalBests.accuracy > highestAccuracy) {
+                highestAccuracy = userData.personalBests.accuracy;
+            }
+        }
+        
+        console.log('Highest WPM found:', highestWpm);
+        console.log('Highest Accuracy found:', highestAccuracy);
+        
+        // Update the displays with animation
+        animateNumber(wpmElement, parseInt(wpmElement.textContent), highestWpm);
+        
+        // Only update accuracy if we found a value greater than 0
+        if (highestAccuracy > 0) {
+            const currentAccuracy = accuracyElement.textContent === '99%' ? 99 : parseFloat(accuracyElement.textContent);
+            animateNumber(accuracyElement, currentAccuracy, highestAccuracy, true);
         }
     } catch (error) {
         console.log('MonkeyType API error:', error);
