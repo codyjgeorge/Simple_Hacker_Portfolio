@@ -315,7 +315,7 @@ async function fetchMonkeyTypeStats() {
                 console.log(`Trying endpoint: ${endpoint}`);
                 response = await fetch(endpoint, {
                     headers: {
-                        'Authorization': `Bearer Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
+                        'Authorization': `ApeKey Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -337,7 +337,12 @@ async function fetchMonkeyTypeStats() {
                 try {
                     console.log(`Trying CORS proxy for: ${endpoint}`);
                     const corsProxy = 'https://api.allorigins.win/raw?url=';
-                    response = await fetch(corsProxy + encodeURIComponent(endpoint));
+                    response = await fetch(corsProxy + encodeURIComponent(endpoint), {
+                        headers: {
+                            'Authorization': `ApeKey Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     if (response.ok) {
                         console.log('CORS proxy call successful');
                         success = true;
@@ -347,7 +352,12 @@ async function fetchMonkeyTypeStats() {
                     console.log('CORS proxy failed, trying alternative...');
                     try {
                         const altProxy = 'https://corsproxy.io/?';
-                        response = await fetch(altProxy + encodeURIComponent(endpoint));
+                        response = await fetch(altProxy + encodeURIComponent(endpoint), {
+                            headers: {
+                                'Authorization': `ApeKey Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
                         if (response.ok) {
                             console.log('Alternative proxy call successful');
                             success = true;
