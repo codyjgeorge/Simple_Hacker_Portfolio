@@ -377,6 +377,10 @@ async function fetchMonkeyTypeStats() {
         // If all API calls fail, use fallback data
         if (!response || !response.ok) {
             console.log('All API attempts failed, using fallback data');
+            console.log('💡 To update your stats manually, use: updateMonkeyTypeStats(wpm, accuracy)');
+            console.log('💡 Example: updateMonkeyTypeStats(63, 97)');
+            console.log('💡 Or use the quick functions: updateWPM(63) or updateAccuracy(97)');
+            
             // Use your known stats as fallback
             const fallbackWpm = 63; // Updated to your actual WPM
             const fallbackAccuracy = 97.0; // Updated to your actual accuracy
