@@ -282,8 +282,9 @@ window.addEventListener('scroll', function() {
 async function fetchMonkeyTypeStats() {
     const username = 'codygeorge315';
     const wpmElement = document.getElementById('monkeytype-wpm');
+    const accuracyElement = document.getElementById('monkeytype-accuracy');
     
-    if (!wpmElement) return;
+    if (!wpmElement || !accuracyElement) return;
     
     try {
         // Fetch user stats from MonkeyType API
@@ -295,29 +296,41 @@ async function fetchMonkeyTypeStats() {
         
         const data = await response.json();
         
-        // Extract the highest WPM from personal bests
+        // Extract the highest WPM and accuracy from personal bests
         if (data.data && data.data.personalBests) {
             const timeModes = data.data.personalBests.time;
             let highestWpm = 83; // Fallback to your current high
+            let highestAccuracy = 0;
             
-            // Check different time modes for highest WPM
+            // Check different time modes for highest WPM and accuracy
             Object.values(timeModes).forEach(mode => {
-                if (mode && mode.wpm > highestWpm) {
-                    highestWpm = mode.wpm;
+                if (mode) {
+                    if (mode.wpm > highestWpm) {
+                        highestWpm = mode.wpm;
+                    }
+                    if (mode.accuracy > highestAccuracy) {
+                        highestAccuracy = mode.accuracy;
+                    }
                 }
             });
             
-            // Update the display with animation
+            // Update the displays with animation
             animateNumber(wpmElement, parseInt(wpmElement.textContent), highestWpm);
+            
+            // Only update accuracy if we found a value greater than 0
+            if (highestAccuracy > 0) {
+                const currentAccuracy = accuracyElement.textContent === '--' ? 0 : parseFloat(accuracyElement.textContent);
+                animateNumber(accuracyElement, currentAccuracy, highestAccuracy, true);
+            }
         }
     } catch (error) {
         console.log('MonkeyType API error:', error);
-        // Keep the current value if API fails
+        // Keep the current values if API fails
     }
 }
 
 // Animate number changes
-function animateNumber(element, startValue, endValue) {
+function animateNumber(element, startValue, endValue, isDecimal = false) {
     const duration = 1000;
     const increment = (endValue - startValue) / (duration / 16);
     let currentValue = startValue;
@@ -325,10 +338,18 @@ function animateNumber(element, startValue, endValue) {
     const timer = setInterval(() => {
         currentValue += increment;
         if (currentValue >= endValue) {
-            element.textContent = Math.round(endValue);
+            if (isDecimal) {
+                element.textContent = endValue.toFixed(1) + '%';
+            } else {
+                element.textContent = Math.round(endValue);
+            }
             clearInterval(timer);
         } else {
-            element.textContent = Math.round(currentValue);
+            if (isDecimal) {
+                element.textContent = currentValue.toFixed(1) + '%';
+            } else {
+                element.textContent = Math.round(currentValue);
+            }
         }
     }, 16);
 }
