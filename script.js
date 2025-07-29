@@ -295,8 +295,27 @@ async function fetchMonkeyTypeStats() {
     
     try {
         console.log('Making API request to MonkeyType...');
-        // Fetch user stats from MonkeyType API
-        const response = await fetch(`https://api.monkeytype.com/v1/users/profile?username=${username}`);
+        
+        // Try multiple approaches to handle CORS issues
+        let response;
+        const apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
+        
+        try {
+            // First, try direct API call
+            response = await fetch(apiUrl);
+        } catch (error) {
+            console.log('Direct API call failed, trying CORS proxy...');
+            try {
+                // Try with CORS proxy
+                const corsProxy = 'https://api.allorigins.win/raw?url=';
+                response = await fetch(corsProxy + encodeURIComponent(apiUrl));
+            } catch (proxyError) {
+                console.log('CORS proxy also failed, trying alternative proxy...');
+                // Try alternative proxy
+                const altProxy = 'https://corsproxy.io/?';
+                response = await fetch(altProxy + encodeURIComponent(apiUrl));
+            }
+        }
         
         console.log('API Response status:', response.status);
         
