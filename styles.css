@@ -484,11 +484,15 @@ section {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 8px;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+    text-decoration: none;
+    color: var(--text-primary);
 }
 
 .contact-item:hover {
     border-color: var(--accent);
+    transform: translateY(-2px);
+    color: var(--accent);
 }
 
 .contact-item i {
