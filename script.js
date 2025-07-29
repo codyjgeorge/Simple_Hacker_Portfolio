@@ -302,9 +302,9 @@ async function fetchMonkeyTypeStats() {
         
         // Use correct MonkeyType API endpoints from documentation
         const apiEndpoints = [
-            `https://api.monkeytype.com/users/stats`,
-            `https://api.monkeytype.com/users/profile/${username}`,
-            `https://api.monkeytype.com/results?limit=100`
+            `https://api.monkeytype.com/results?limit=100`,
+            `https://api.monkeytype.com/results/last`,
+            `https://api.monkeytype.com/users/stats`
         ];
         
         let success = false;
@@ -396,7 +396,25 @@ async function fetchMonkeyTypeStats() {
         let highestWpm = 83; // Fallback to your current high
         let highestAccuracy = 0;
         
-        // Check if we got stats data
+        // Check if we got results data (this contains WPM and accuracy)
+        if (data && data.result && data.result.length > 0) {
+            console.log('Results data found, checking for best scores...');
+            console.log('Number of results:', data.result.length);
+            
+            data.result.forEach((result, index) => {
+                console.log(`Result ${index + 1}:`, result);
+                if (result.wpm && result.wpm > highestWpm) {
+                    highestWpm = result.wpm;
+                    console.log(`New highest WPM found: ${highestWpm}`);
+                }
+                if (result.accuracy && result.accuracy > highestAccuracy) {
+                    highestAccuracy = result.accuracy;
+                    console.log(`New highest accuracy found: ${highestAccuracy}`);
+                }
+            });
+        }
+        
+        // If no results data, check for stats data
         if (data && data.data) {
             const stats = data.data;
             console.log('Stats data found:', stats);
@@ -420,27 +438,6 @@ async function fetchMonkeyTypeStats() {
                     }
                 });
             }
-            
-            // Also check for overall stats
-            if (stats.allTime && stats.allTime.wpm && stats.allTime.wpm > highestWpm) {
-                highestWpm = stats.allTime.wpm;
-            }
-            if (stats.allTime && stats.allTime.accuracy && stats.allTime.accuracy > highestAccuracy) {
-                highestAccuracy = stats.allTime.accuracy;
-            }
-        }
-        
-        // If no stats data, try results data
-        if (data && data.result && data.result.length > 0) {
-            console.log('Results data found, checking for best scores...');
-            data.result.forEach(result => {
-                if (result.wpm && result.wpm > highestWpm) {
-                    highestWpm = result.wpm;
-                }
-                if (result.accuracy && result.accuracy > highestAccuracy) {
-                    highestAccuracy = result.accuracy;
-                }
-            });
         }
         
         console.log('Highest WPM found:', highestWpm);
