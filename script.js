@@ -295,6 +295,7 @@ async function fetchMonkeyTypeStats() {
     
     try {
         console.log('Making API request to MonkeyType...');
+        console.log('Using API key:', 'Njg4ODY5ZDRkZWJmZjc4YTQzMWIyZTM5LkNGLTdqR29sWWl4LTIwR2dkaG1xaUwtajN1STF6MFNG');
         
         // Try multiple approaches to handle CORS issues
         let response;
@@ -302,8 +303,8 @@ async function fetchMonkeyTypeStats() {
         
         // Use correct MonkeyType API endpoints from documentation
         const apiEndpoints = [
-            `https://api.monkeytype.com/results?limit=100`,
             `https://api.monkeytype.com/results/last`,
+            `https://api.monkeytype.com/results?limit=10`,
             `https://api.monkeytype.com/users/stats`
         ];
         
@@ -314,7 +315,7 @@ async function fetchMonkeyTypeStats() {
                 console.log(`Trying endpoint: ${endpoint}`);
                 response = await fetch(endpoint, {
                     headers: {
-                        'Authorization': `ApeKey Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
+                        'Authorization': `ApeKey Njg4ODY5ZDRkZWJmZjc4YTQzMWIyZTM5LkNGLTdqR29sWWl4LTIwR2dkaG1xaUwtajN1STF6MFNG`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -324,9 +325,15 @@ async function fetchMonkeyTypeStats() {
                     break;
                 } else {
                     console.log(`Endpoint ${endpoint} returned status: ${response.status}`);
+                    if (response.status === 401) {
+                        console.log('Authentication failed - check your API key');
+                    }
                 }
             } catch (error) {
                 console.log(`Endpoint ${endpoint} failed:`, error.message);
+                if (error.message.includes('CORS')) {
+                    console.log('CORS error - trying without proxy...');
+                }
             }
         }
         
@@ -335,11 +342,13 @@ async function fetchMonkeyTypeStats() {
             for (let endpoint of apiEndpoints) {
                 try {
                     console.log(`Trying CORS proxy for: ${endpoint}`);
-                    const corsProxy = 'https://api.allorigins.win/raw?url=';
-                    response = await fetch(corsProxy + encodeURIComponent(endpoint), {
+                    // Try a different proxy that might support auth headers
+                    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+                    response = await fetch(corsProxy + endpoint, {
                         headers: {
-                            'Authorization': `ApeKey Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
-                            'Content-Type': 'application/json'
+                            'Authorization': `ApeKey Njg4ODY5ZDRkZWJmZjc4YTQzMWIyZTM5LkNGLTdqR29sWWl4LTIwR2dkaG1xaUwtajN1STF6MFNG`,
+                            'Content-Type': 'application/json',
+                            'Origin': window.location.origin
                         }
                     });
                     if (response.ok) {
@@ -350,15 +359,11 @@ async function fetchMonkeyTypeStats() {
                 } catch (proxyError) {
                     console.log('CORS proxy failed, trying alternative...');
                     try {
-                        const altProxy = 'https://corsproxy.io/?';
-                        response = await fetch(altProxy + encodeURIComponent(endpoint), {
-                            headers: {
-                                'Authorization': `ApeKey Njg4ODYyM2ZkZWJmZjc4YTQzMWFlNGQ4LlNkUWphUUpHb3dJWHFIbERRX3ZrVy0waW5ZcHl2Mkdw`,
-                                'Content-Type': 'application/json'
-                            }
-                        });
+                        // Try without auth headers (might work for public data)
+                        const altProxy = 'https://api.allorigins.win/raw?url=';
+                        response = await fetch(altProxy + encodeURIComponent(endpoint));
                         if (response.ok) {
-                            console.log('Alternative proxy call successful');
+                            console.log('Alternative proxy call successful (without auth)');
                             success = true;
                             break;
                         }
@@ -373,8 +378,8 @@ async function fetchMonkeyTypeStats() {
         if (!response || !response.ok) {
             console.log('All API attempts failed, using fallback data');
             // Use your known stats as fallback
-            const fallbackWpm = 83;
-            const fallbackAccuracy = 99.0; // Updated to match your display
+            const fallbackWpm = 63; // Updated to your actual WPM
+            const fallbackAccuracy = 97.0; // Updated to your actual accuracy
             
             animateNumber(wpmElement, parseInt(wpmElement.textContent), fallbackWpm);
             animateNumber(accuracyElement, 0, fallbackAccuracy, true);
@@ -393,29 +398,44 @@ async function fetchMonkeyTypeStats() {
         // Parse data according to MonkeyType API documentation
         console.log('API Data received:', data);
         
-        let highestWpm = 83; // Fallback to your current high
+        let highestWpm = 0; // Start from 0 to find the actual highest
         let highestAccuracy = 0;
         
         // Check if we got results data (this contains WPM and accuracy)
-        if (data && data.result && data.result.length > 0) {
+        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
             console.log('Results data found, checking for best scores...');
-            console.log('Number of results:', data.result.length);
+            console.log('Number of results:', data.data.length);
             
-            data.result.forEach((result, index) => {
+            data.data.forEach((result, index) => {
                 console.log(`Result ${index + 1}:`, result);
                 if (result.wpm && result.wpm > highestWpm) {
                     highestWpm = result.wpm;
                     console.log(`New highest WPM found: ${highestWpm}`);
                 }
-                if (result.accuracy && result.accuracy > highestAccuracy) {
-                    highestAccuracy = result.accuracy;
+                if (result.acc && result.acc > highestAccuracy) {
+                    highestAccuracy = result.acc;
                     console.log(`New highest accuracy found: ${highestAccuracy}`);
                 }
             });
         }
         
+        // If no results array, check for single result data (from /results/last)
+        if (data && data.data && !Array.isArray(data.data) && data.data.wpm) {
+            console.log('Single result data found:', data.data);
+            const result = data.data;
+            
+            if (result.wpm && result.wpm > highestWpm) {
+                highestWpm = result.wpm;
+                console.log(`New highest WPM found: ${highestWpm}`);
+            }
+            if (result.acc && result.acc > highestAccuracy) {
+                highestAccuracy = result.acc;
+                console.log(`New highest accuracy found: ${highestAccuracy}`);
+            }
+        }
+        
         // If no results data, check for stats data
-        if (data && data.data) {
+        if (data && data.data && !data.data.wpm) {
             const stats = data.data;
             console.log('Stats data found:', stats);
             
