@@ -94,10 +94,10 @@ Update skill percentages in the skills section:
 
 ## 🎯 Browser Support
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+- Chrome
+- Firefox
+- Safari
+- Edge
 
 ## 📱 Responsive Design
 
@@ -109,9 +109,9 @@ The website is fully responsive and works on:
 
 ## 🔧 Technologies Used
 
-- **HTML5**: Semantic markup
-- **CSS3**: Modern styling with CSS Grid and Flexbox
-- **JavaScript (ES6+)**: Interactive functionality
+- **HTML**: Semantic markup
+- **CSS**: Modern styling with CSS Grid and Flexbox
+- **JavaScript**: Interactive functionality
 - **Font Awesome**: Icons
 - **Google Fonts**: JetBrains Mono and Orbitron fonts
 
@@ -137,4 +137,4 @@ If you have any questions or need help customizing the portfolio, feel free to r
 
 ---
 
-**Built with ❤️ and lots of ☕** 
+**Built with tears and lots of ☕** 
