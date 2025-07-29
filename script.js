@@ -300,12 +300,11 @@ async function fetchMonkeyTypeStats() {
         let response;
         let apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
         
-        // Try different API endpoints (updated based on current MonkeyType API)
+        // Use correct MonkeyType API endpoints from documentation
         const apiEndpoints = [
-            `https://api.monkeytype.com/v1/users/${username}`,
-            `https://api.monkeytype.com/v1/users/${username}/profile`,
-            `https://api.monkeytype.com/v1/users/profile?username=${username}`,
-            `https://api.monkeytype.com/v1/users/${username}/personal-bests`
+            `https://api.monkeytype.com/users/stats`,
+            `https://api.monkeytype.com/users/profile/${username}`,
+            `https://api.monkeytype.com/results?limit=100`
         ];
         
         let success = false;
@@ -391,55 +390,57 @@ async function fetchMonkeyTypeStats() {
         const data = await response.json();
         console.log('API Data received:', data);
         
-        // Try different data structures that MonkeyType API might return
-        let personalBests = null;
-        let userData = null;
-        
-        // Check various possible data structures
-        if (data.data && data.data.personalBests) {
-            personalBests = data.data.personalBests;
-            userData = data.data;
-        } else if (data.personalBests) {
-            personalBests = data.personalBests;
-            userData = data;
-        } else if (data.data) {
-            userData = data.data;
-        } else if (data) {
-            userData = data;
-        }
-        
-        console.log('Personal bests found:', personalBests);
-        console.log('User data found:', userData);
+        // Parse data according to MonkeyType API documentation
+        console.log('API Data received:', data);
         
         let highestWpm = 83; // Fallback to your current high
         let highestAccuracy = 0;
         
-        // Extract stats from personal bests if available
-        if (personalBests && personalBests.time) {
-            const timeModes = personalBests.time;
-            console.log('Time modes found:', Object.keys(timeModes));
+        // Check if we got stats data
+        if (data && data.data) {
+            const stats = data.data;
+            console.log('Stats data found:', stats);
             
-            // Check different time modes for highest WPM and accuracy
-            Object.values(timeModes).forEach(mode => {
-                if (mode) {
-                    if (mode.wpm > highestWpm) {
-                        highestWpm = mode.wpm;
+            // Extract from personalBests if available
+            if (stats.personalBests && stats.personalBests.time) {
+                const timeModes = stats.personalBests.time;
+                console.log('Time modes found:', Object.keys(timeModes));
+                
+                // Check different time modes for highest WPM and accuracy
+                Object.values(timeModes).forEach(mode => {
+                    if (mode && mode.wpm) {
+                        if (mode.wpm > highestWpm) {
+                            highestWpm = mode.wpm;
+                        }
                     }
-                    if (mode.accuracy > highestAccuracy) {
-                        highestAccuracy = mode.accuracy;
+                    if (mode && mode.accuracy) {
+                        if (mode.accuracy > highestAccuracy) {
+                            highestAccuracy = mode.accuracy;
+                        }
                     }
-                }
-            });
+                });
+            }
+            
+            // Also check for overall stats
+            if (stats.allTime && stats.allTime.wpm && stats.allTime.wpm > highestWpm) {
+                highestWpm = stats.allTime.wpm;
+            }
+            if (stats.allTime && stats.allTime.accuracy && stats.allTime.accuracy > highestAccuracy) {
+                highestAccuracy = stats.allTime.accuracy;
+            }
         }
         
-        // Also check for stats in user data
-        if (userData) {
-            if (userData.personalBests && userData.personalBests.wpm > highestWpm) {
-                highestWpm = userData.personalBests.wpm;
-            }
-            if (userData.personalBests && userData.personalBests.accuracy > highestAccuracy) {
-                highestAccuracy = userData.personalBests.accuracy;
-            }
+        // If no stats data, try results data
+        if (data && data.result && data.result.length > 0) {
+            console.log('Results data found, checking for best scores...');
+            data.result.forEach(result => {
+                if (result.wpm && result.wpm > highestWpm) {
+                    highestWpm = result.wpm;
+                }
+                if (result.accuracy && result.accuracy > highestAccuracy) {
+                    highestAccuracy = result.accuracy;
+                }
+            });
         }
         
         console.log('Highest WPM found:', highestWpm);
