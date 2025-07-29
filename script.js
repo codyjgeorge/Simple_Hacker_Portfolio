@@ -278,6 +278,67 @@ window.addEventListener('scroll', function() {
     progressBar.style.width = scrolled + '%';
 });
 
+// MonkeyType API Integration
+async function fetchMonkeyTypeStats() {
+    const username = 'codygeorge315';
+    const wpmElement = document.getElementById('monkeytype-wpm');
+    
+    if (!wpmElement) return;
+    
+    try {
+        // Fetch user stats from MonkeyType API
+        const response = await fetch(`https://api.monkeytype.com/v1/users/profile?username=${username}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch MonkeyType stats');
+        }
+        
+        const data = await response.json();
+        
+        // Extract the highest WPM from personal bests
+        if (data.data && data.data.personalBests) {
+            const timeModes = data.data.personalBests.time;
+            let highestWpm = 83; // Fallback to your current high
+            
+            // Check different time modes for highest WPM
+            Object.values(timeModes).forEach(mode => {
+                if (mode && mode.wpm > highestWpm) {
+                    highestWpm = mode.wpm;
+                }
+            });
+            
+            // Update the display with animation
+            animateNumber(wpmElement, parseInt(wpmElement.textContent), highestWpm);
+        }
+    } catch (error) {
+        console.log('MonkeyType API error:', error);
+        // Keep the current value if API fails
+    }
+}
+
+// Animate number changes
+function animateNumber(element, startValue, endValue) {
+    const duration = 1000;
+    const increment = (endValue - startValue) / (duration / 16);
+    let currentValue = startValue;
+    
+    const timer = setInterval(() => {
+        currentValue += increment;
+        if (currentValue >= endValue) {
+            element.textContent = Math.round(endValue);
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.round(currentValue);
+        }
+    }, 16);
+}
+
+// Fetch MonkeyType stats when page loads
+window.addEventListener('load', function() {
+    // Delay the API call to avoid overwhelming the server
+    setTimeout(fetchMonkeyTypeStats, 2000);
+});
+
 // Add some terminal-style console messages
 console.log('%cWelcome to the Matrix...', 'color: #00ff41; font-family: "JetBrains Mono", monospace; font-size: 20px; font-weight: bold;');
 console.log('%cThis portfolio was built with HTML, CSS, and JavaScript.', 'color: #00cc00; font-family: "JetBrains Mono", monospace;');
