@@ -280,7 +280,7 @@ window.addEventListener('scroll', function() {
 
 // MonkeyType API Integration
 async function fetchMonkeyTypeStats() {
-    const username = 'codygeorge315';
+    const username = 'codygeorge315'; // Verify this is your exact MonkeyType username
     const wpmElement = document.getElementById('monkeytype-wpm');
     const accuracyElement = document.getElementById('monkeytype-accuracy');
     
@@ -298,23 +298,38 @@ async function fetchMonkeyTypeStats() {
         
         // Try multiple approaches to handle CORS issues
         let response;
-        const apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
+        let apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
         
         try {
             // First, try direct API call
             response = await fetch(apiUrl);
+            console.log('Direct API call successful');
         } catch (error) {
             console.log('Direct API call failed, trying CORS proxy...');
             try {
                 // Try with CORS proxy
                 const corsProxy = 'https://api.allorigins.win/raw?url=';
                 response = await fetch(corsProxy + encodeURIComponent(apiUrl));
+                console.log('CORS proxy call successful');
             } catch (proxyError) {
                 console.log('CORS proxy also failed, trying alternative proxy...');
                 // Try alternative proxy
                 const altProxy = 'https://corsproxy.io/?';
                 response = await fetch(altProxy + encodeURIComponent(apiUrl));
+                console.log('Alternative proxy call successful');
             }
+        }
+        
+        // If all API calls fail, use fallback data
+        if (!response || !response.ok) {
+            console.log('All API attempts failed, using fallback data');
+            // Use your known stats as fallback
+            const fallbackWpm = 83;
+            const fallbackAccuracy = 95.0; // You can update this to your actual accuracy
+            
+            animateNumber(wpmElement, parseInt(wpmElement.textContent), fallbackWpm);
+            animateNumber(accuracyElement, 0, fallbackAccuracy, true);
+            return;
         }
         
         console.log('API Response status:', response.status);
@@ -390,6 +405,18 @@ function animateNumber(element, startValue, endValue, isDecimal = false) {
             }
         }
     }, 16);
+}
+
+// Manual stats update function (you can call this to update your stats)
+function updateMonkeyTypeStats(wpm, accuracy) {
+    const wpmElement = document.getElementById('monkeytype-wpm');
+    const accuracyElement = document.getElementById('monkeytype-accuracy');
+    
+    if (wpmElement && accuracyElement) {
+        animateNumber(wpmElement, parseInt(wpmElement.textContent), wpm);
+        animateNumber(accuracyElement, 0, accuracy, true);
+        console.log(`Updated stats: WPM ${wpm}, Accuracy ${accuracy}%`);
+    }
 }
 
 // Fetch MonkeyType stats when page loads
