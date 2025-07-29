@@ -142,32 +142,18 @@ if (statsSection) {
 const contactForm = document.querySelector('.contact-form form');
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(this);
-        const name = this.querySelector('input[type="text"]').value;
-        const email = this.querySelector('input[type="email"]').value;
-        const message = this.querySelector('textarea').value;
-        
-        // Simple validation
-        if (!name || !email || !message) {
-            showNotification('Please fill in all fields', 'error');
-            return;
-        }
-        
-        // Simulate form submission
+        // Let the form submit normally to Formspree
         const submitBtn = this.querySelector('.submit-btn');
         const originalText = submitBtn.querySelector('.btn-text').textContent;
         submitBtn.querySelector('.btn-text').textContent = 'Sending...';
         submitBtn.disabled = true;
         
+        // Show success message after a short delay
         setTimeout(() => {
             showNotification('Message sent successfully!', 'success');
-            this.reset();
             submitBtn.querySelector('.btn-text').textContent = originalText;
             submitBtn.disabled = false;
-        }, 2000);
+        }, 1000);
     });
 }
 
