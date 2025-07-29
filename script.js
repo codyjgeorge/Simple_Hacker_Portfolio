@@ -570,20 +570,22 @@ window.addEventListener('load', function() {
 });
 
 // View Counter using CountAPI
-fetch('https://api.countapi.xyz/hit/simple-hacker-portfolio/visits')
-  .then(response => response.json())
-  .then(data => {
-    const counter = document.getElementById('view-counter');
-    if (counter && data.value !== undefined) {
-      counter.textContent = `Views: ${data.value}`;
-    }
-  })
-  .catch(() => {
-    const counter = document.getElementById('view-counter');
-    if (counter) {
-      counter.textContent = 'Views: (unavailable)';
-    }
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('https://api.countapi.xyz/hit/simple-hacker-portfolio/visits')
+    .then(response => response.json())
+    .then(data => {
+      const counter = document.getElementById('view-counter');
+      if (counter && data.value !== undefined) {
+        counter.textContent = `Views: ${data.value}`;
+      }
+    })
+    .catch(() => {
+      const counter = document.getElementById('view-counter');
+      if (counter) {
+        counter.textContent = 'Views: (unavailable)';
+      }
+    });
+});
 
 // Add some terminal-style console messages
 console.log('%cWelcome to the Matrix...', 'color: #00ff41; font-family: "JetBrains Mono", monospace; font-size: 20px; font-weight: bold;');
