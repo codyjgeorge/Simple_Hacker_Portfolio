@@ -300,23 +300,57 @@ async function fetchMonkeyTypeStats() {
         let response;
         let apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
         
-        try {
-            // First, try direct API call
-            response = await fetch(apiUrl);
-            console.log('Direct API call successful');
-        } catch (error) {
-            console.log('Direct API call failed, trying CORS proxy...');
+        // Try different API endpoints
+        const apiEndpoints = [
+            `https://api.monkeytype.com/v1/users/profile?username=${username}`,
+            `https://api.monkeytype.com/v1/users/${username}`,
+            `https://api.monkeytype.com/v1/users/profile/${username}`
+        ];
+        
+        let success = false;
+        
+        for (let endpoint of apiEndpoints) {
             try {
-                // Try with CORS proxy
-                const corsProxy = 'https://api.allorigins.win/raw?url=';
-                response = await fetch(corsProxy + encodeURIComponent(apiUrl));
-                console.log('CORS proxy call successful');
-            } catch (proxyError) {
-                console.log('CORS proxy also failed, trying alternative proxy...');
-                // Try alternative proxy
-                const altProxy = 'https://corsproxy.io/?';
-                response = await fetch(altProxy + encodeURIComponent(apiUrl));
-                console.log('Alternative proxy call successful');
+                console.log(`Trying endpoint: ${endpoint}`);
+                response = await fetch(endpoint);
+                if (response.ok) {
+                    console.log(`API call successful with endpoint: ${endpoint}`);
+                    success = true;
+                    break;
+                } else {
+                    console.log(`Endpoint ${endpoint} returned status: ${response.status}`);
+                }
+            } catch (error) {
+                console.log(`Endpoint ${endpoint} failed:`, error.message);
+            }
+        }
+        
+        if (!success) {
+            // Try with CORS proxies
+            for (let endpoint of apiEndpoints) {
+                try {
+                    console.log(`Trying CORS proxy for: ${endpoint}`);
+                    const corsProxy = 'https://api.allorigins.win/raw?url=';
+                    response = await fetch(corsProxy + encodeURIComponent(endpoint));
+                    if (response.ok) {
+                        console.log('CORS proxy call successful');
+                        success = true;
+                        break;
+                    }
+                } catch (proxyError) {
+                    console.log('CORS proxy failed, trying alternative...');
+                    try {
+                        const altProxy = 'https://corsproxy.io/?';
+                        response = await fetch(altProxy + encodeURIComponent(endpoint));
+                        if (response.ok) {
+                            console.log('Alternative proxy call successful');
+                            success = true;
+                            break;
+                        }
+                    } catch (altError) {
+                        console.log('Alternative proxy also failed');
+                    }
+                }
             }
         }
         
@@ -325,7 +359,7 @@ async function fetchMonkeyTypeStats() {
             console.log('All API attempts failed, using fallback data');
             // Use your known stats as fallback
             const fallbackWpm = 83;
-            const fallbackAccuracy = 95.0; // You can update this to your actual accuracy
+            const fallbackAccuracy = 99.0; // Updated to match your display
             
             animateNumber(wpmElement, parseInt(wpmElement.textContent), fallbackWpm);
             animateNumber(accuracyElement, 0, fallbackAccuracy, true);
@@ -416,6 +450,23 @@ function updateMonkeyTypeStats(wpm, accuracy) {
         animateNumber(wpmElement, parseInt(wpmElement.textContent), wpm);
         animateNumber(accuracyElement, 0, accuracy, true);
         console.log(`Updated stats: WPM ${wpm}, Accuracy ${accuracy}%`);
+    }
+}
+
+// Quick update functions for common scenarios
+function updateWPM(wpm) {
+    const wpmElement = document.getElementById('monkeytype-wpm');
+    if (wpmElement) {
+        animateNumber(wpmElement, parseInt(wpmElement.textContent), wpm);
+        console.log(`Updated WPM to: ${wpm}`);
+    }
+}
+
+function updateAccuracy(accuracy) {
+    const accuracyElement = document.getElementById('monkeytype-accuracy');
+    if (accuracyElement) {
+        animateNumber(accuracyElement, 0, accuracy, true);
+        console.log(`Updated Accuracy to: ${accuracy}%`);
     }
 }
 
