@@ -8,7 +8,12 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Configure CORS to allow your GitHub Pages domain
-const allowedOrigins = ['https://codygeorge.github.io/Simple_Hacker_Portfolio/'];
+const allowedOrigins = ['https://codygeorge.github.io/Simple_Hacker_Portfolio/',
+    'https://monkeytypebackend-codyjgeorge-cody-georges-projects.vercel.app/',
+    'https://monkeytypebackend-codyjgeorge-cody-georges-projects.vercel.app',
+    'https://monkeytypebackend-codyjgeorge-cody-georges-projects.vercel.app/api/monkeytype',
+    'https://monkeytypebackend-codyjgeorge-cody-georges-projects.vercel.app/api/monkeytype',
+];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
