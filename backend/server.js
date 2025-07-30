@@ -4,9 +4,13 @@ const fetch = require('node-fetch');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// Configure CORS to allow your GitHub Pages domain
+app.use(cors({
+    origin: ['https://codygeorge.github.io', 'http://localhost:3000', 'http://127.0.0.1:5500'],
+    credentials: true
+}));
 app.use(express.json());
 
 // Proxy endpoint for MonkeyType API
