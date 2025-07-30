@@ -35,7 +35,16 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Proxy endpoint for MonkeyType API
+// Options Handler for MonkeyType API
+app.options('/api/monkeytype', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
+// Proxy endpoint (POST Handler) for MonkeyType API
 app.post('/api/monkeytype', async (req, res) => {
     // Set CORS headers explicitly
     res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
