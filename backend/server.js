@@ -58,6 +58,15 @@ app.post('/api/monkeytype', async (req, res) => {
     }
 });
 
+// Test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ 
+        message: 'Backend is working!', 
+        hasApiKey: !!process.env.MONKEYTYPE_API_KEY,
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Backend server running on http://localhost:${PORT}`);
 });
