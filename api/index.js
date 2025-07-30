@@ -8,35 +8,17 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Configure CORS to allow your GitHub Pages domain
+const allowedOrigins = ['https://codygeorge.github.io/Simple_Hacker_Portfolio/'];
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, etc.)
-        if (!origin) return callback(null, true);
-        
-        const allowedOrigins = [
-            'https://codygeorge.github.io',
-            'https://codygeorge.github.io/Simple_Hacker_Portfolio',
-            'https://monkeytypebackend-ujfcx3owd-cody-georges-projects.vercel.app/api/monkeytype',
-            'https://monkeytypebackend.vercel.app',
-            'https://monkeytypebackend-cody-georges-projects.vercel.app',
-            'https://monkeytypebackend-codyjgeorge-cody-georges-projects.vercel.app',
-            'http://localhost:3000',
-            'http://127.0.0.1:5500'
-        ];
-        
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        
-        // For debugging, allow all origins temporarily
-        return callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
-    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
-    preflightContinue: false,
-    optionsSuccessStatus: 200
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 app.use(express.json());
 
