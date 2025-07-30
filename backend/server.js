@@ -8,15 +8,41 @@ const PORT = process.env.PORT || 3001;
 
 // Configure CORS to allow your GitHub Pages domain
 app.use(cors({
-    origin: true, // Allow all origins for now to debug
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            'https://codygeorge.github.io',
+            'https://codygeorge.github.io/Simple_Hacker_Portfolio',
+            'http://localhost:3000',
+            'http://127.0.0.1:5500'
+        ];
+        
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        
+        // For debugging, allow all origins temporarily
+        return callback(null, true);
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+    preflightContinue: false,
+    optionsSuccessStatus: 200
 }));
 app.use(express.json());
 
 // Proxy endpoint for MonkeyType API
 app.post('/api/monkeytype', async (req, res) => {
+    // Set CORS headers explicitly
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     const { endpoint, method = 'GET', body } = req.body;
 
     console.log('Received request:', { endpoint, method, body });
@@ -60,6 +86,12 @@ app.post('/api/monkeytype', async (req, res) => {
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
+    // Set CORS headers explicitly
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     res.json({ 
         message: 'Backend is working!', 
         hasApiKey: !!process.env.MONKEYTYPE_API_KEY,
