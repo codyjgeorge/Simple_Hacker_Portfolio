@@ -15,7 +15,10 @@ app.use(cors({
         const allowedOrigins = [
             'https://codygeorge.github.io',
             'https://codygeorge.github.io/Simple_Hacker_Portfolio',
-            'https://monkeytypebackend-759pfwl1n-cody-georges-projects.vercel.app',
+            'https://monkeytypebackend-ujicx3owd-cody-georges-projects.vercel.app',
+            'https://monkeytypebackend.vercel.app',
+            'https://monkeytypebackend-cody-georges-projects.vercel.app',
+            'https://monkeytypebackend-codyjgeorge-cody-georges-projects.vercel.app',
             'http://localhost:3000',
             'http://127.0.0.1:5500'
         ];
