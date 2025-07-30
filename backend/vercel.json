@@ -1,12 +1,9 @@
-
 {
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://codyjgeorge.github.io/Simple_Hacker_Portfolio/" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        { "key": "Access-Control-Allow-Origin", "value": "https://codyjgeorge.github.io/Simple_Hacker_Portfolio/" }
       ]
     }
   ]
