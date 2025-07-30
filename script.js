@@ -291,7 +291,7 @@ async function fetchMonkeyTypeStats() {
 
     try {
         // Use the backend proxy to fetch MonkeyType personal bests for the user
-        const response = await fetch('http://localhost:3001/api/monkeytype', {
+        const response = await fetch('https://monkeytypebackend-cvm7vhbjb-cody-georges-projects.vercel.app/api/monkeytype', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
