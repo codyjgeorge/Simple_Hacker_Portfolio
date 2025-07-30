@@ -1,3 +1,4 @@
+console.log('Server function initialized');
 require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
