@@ -4,6 +4,18 @@
     { "src": "server.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "server.js" }
+    { "src": "/api/(.https://codyjgeorge.github.io/Simple_Hacker_Portfolio/)", "dest": "server.js" }
+  ]
+}
+{
+  "headers": [
+    {
+      "source": "/api/(.https://codyjgeorge.github.io/Simple_Hacker_Portfolio/)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "https://codyjgeorge.github.io/Simple_Hacker_Portfolio/" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
   ]
 }
