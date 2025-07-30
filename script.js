@@ -295,7 +295,7 @@ async function fetchMonkeyTypeStats() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                endpoint: 'https://api.monkeytype.com/users/personalBests',
+                endpoint: 'https://api.monkeytype.com/users/personalBests?mode=time&mode2=60',
                 method: 'GET'
             })
         });
@@ -305,30 +305,18 @@ async function fetchMonkeyTypeStats() {
         }
 
         const data = await response.json();
-        // Parse data - API returns personal bests organized by mode
+        // Parse data for 60-second time mode personal best
         let highestWpm = 0;
         let highestAccuracy = 0;
         
         if (data && data.data) {
-            // Check all test modes for the highest WPM and accuracy
-            const modes = ['time', 'words', 'quote', 'zen', 'custom'];
-            
-            modes.forEach(mode => {
-                if (data.data[mode]) {
-                    Object.values(data.data[mode]).forEach(modeData => {
-                        if (Array.isArray(modeData)) {
-                            modeData.forEach(record => {
-                                if (record.wpm && record.wpm > highestWpm) {
-                                    highestWpm = record.wpm;
-                                }
-                                if (record.acc && record.acc > highestAccuracy) {
-                                    highestAccuracy = record.acc;
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            // For mode=time&mode2=60, the response should contain the personal best for 60s tests
+            if (data.data.wpm) {
+                highestWpm = data.data.wpm;
+            }
+            if (data.data.acc) {
+                highestAccuracy = data.data.acc;
+            }
         }
 
         // Update the displays with animation
