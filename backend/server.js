@@ -8,8 +8,10 @@ const PORT = process.env.PORT || 3001;
 
 // Configure CORS to allow your GitHub Pages domain
 app.use(cors({
-    origin: ['https://codygeorge.github.io', 'http://localhost:3000', 'http://127.0.0.1:5500'],
-    credentials: true
+    origin: ['https://codygeorge.github.io', 'http://localhost:3000', 'http://127.0.0.1:5500', 'https://codygeorge.github.io/Simple_Hacker_Portfolio'],
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
