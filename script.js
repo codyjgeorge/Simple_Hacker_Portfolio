@@ -280,205 +280,59 @@ window.addEventListener('scroll', function() {
 
 // MonkeyType API Integration
 async function fetchMonkeyTypeStats() {
-    const username = 'codygeorge315'; // Verify this is your exact MonkeyType username
+    const username = 'codygeorge315';
     const wpmElement = document.getElementById('monkeytype-wpm');
     const accuracyElement = document.getElementById('monkeytype-accuracy');
-    
-    console.log('Fetching MonkeyType stats...');
-    console.log('WPM Element:', wpmElement);
-    console.log('Accuracy Element:', accuracyElement);
-    
+
     if (!wpmElement || !accuracyElement) {
         console.log('MonkeyType elements not found, aborting fetch');
         return;
     }
-    
+
     try {
-        console.log('Making API request to MonkeyType...');
-        console.log('Using API key:', 'Njg4ODY5ZDRkZWJmZjc4YTQzMWIyZTM5LkNGLTdqR29sWWl4LTIwR2dkaG1xaUwtajN1STF6MFNG');
-        
-        // Try multiple approaches to handle CORS issues
-        let response;
-        let apiUrl = `https://api.monkeytype.com/v1/users/profile?username=${username}`;
-        
-        // Use correct MonkeyType API endpoints from documentation
-        const apiEndpoints = [
-            `https://api.monkeytype.com/results/last`,
-            `https://api.monkeytype.com/results?limit=10`,
-            `https://api.monkeytype.com/users/stats`
-        ];
-        
-        let success = false;
-        
-        for (let endpoint of apiEndpoints) {
-            try {
-                console.log(`Trying endpoint: ${endpoint}`);
-                response = await fetch(endpoint, {
-                    headers: {
-                        'Authorization': `ApeKey Njg4ODY5ZDRkZWJmZjc4YTQzMWIyZTM5LkNGLTdqR29sWWl4LTIwR2dkaG1xaUwtajN1STF6MFNG`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (response.ok) {
-                    console.log(`API call successful with endpoint: ${endpoint}`);
-                    success = true;
-                    break;
-                } else {
-                    console.log(`Endpoint ${endpoint} returned status: ${response.status}`);
-                    if (response.status === 401) {
-                        console.log('Authentication failed - check your API key');
-                    }
-                }
-            } catch (error) {
-                console.log(`Endpoint ${endpoint} failed:`, error.message);
-                if (error.message.includes('CORS')) {
-                    console.log('CORS error - trying without proxy...');
-                }
-            }
-        }
-        
-        if (!success) {
-            // Try with CORS proxies
-            for (let endpoint of apiEndpoints) {
-                try {
-                    console.log(`Trying CORS proxy for: ${endpoint}`);
-                    // Try a different proxy that might support auth headers
-                    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-                    response = await fetch(corsProxy + endpoint, {
-                        headers: {
-                            'Authorization': `ApeKey Njg4ODY5ZDRkZWJmZjc4YTQzMWIyZTM5LkNGLTdqR29sWWl4LTIwR2dkaG1xaUwtajN1STF6MFNG`,
-                            'Content-Type': 'application/json',
-                            'Origin': window.location.origin
-                        }
-                    });
-                    if (response.ok) {
-                        console.log('CORS proxy call successful');
-                        success = true;
-                        break;
-                    }
-                } catch (proxyError) {
-                    console.log('CORS proxy failed, trying alternative...');
-                    try {
-                        // Try without auth headers (might work for public data)
-                        const altProxy = 'https://api.allorigins.win/raw?url=';
-                        response = await fetch(altProxy + encodeURIComponent(endpoint));
-                        if (response.ok) {
-                            console.log('Alternative proxy call successful (without auth)');
-                            success = true;
-                            break;
-                        }
-                    } catch (altError) {
-                        console.log('Alternative proxy also failed');
-                    }
-                }
-            }
-        }
-        
-        // If all API calls fail, use fallback data
-        if (!response || !response.ok) {
-            console.log('All API attempts failed, using fallback data');
-            console.log('💡 To update your stats manually, use: updateMonkeyTypeStats(wpm, accuracy)');
-            console.log('💡 Example: updateMonkeyTypeStats(63, 97)');
-            console.log('💡 Or use the quick functions: updateWPM(63) or updateAccuracy(97)');
-            
-            // Use your known stats as fallback
-            const fallbackWpm = 63; // Updated to your actual WPM
-            const fallbackAccuracy = 97.0; // Updated to your actual accuracy
-            
-            animateNumber(wpmElement, parseInt(wpmElement.textContent), fallbackWpm);
-            animateNumber(accuracyElement, 0, fallbackAccuracy, true);
-            return;
-        }
-        
-        console.log('API Response status:', response.status);
-        
+        // Use the backend proxy to fetch MonkeyType personal bests for the user
+        const response = await fetch('http://localhost:3001/api/monkeytype', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                endpoint: 'https://api.monkeytype.com/users/personalBests?mode=words&mode2=25',
+                method: 'GET'
+            })
+        });
+
         if (!response.ok) {
-            throw new Error(`Failed to fetch MonkeyType stats: ${response.status}`);
+            throw new Error(`Failed to fetch MonkeyType personal bests: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        console.log('API Data received:', data);
-        
-        // Parse data according to MonkeyType API documentation
-        console.log('API Data received:', data);
-        
-        let highestWpm = 0; // Start from 0 to find the actual highest
+        // Parse data - API returns an array of personal best records
+        let highestWpm = 0;
         let highestAccuracy = 0;
-        
-        // Check if we got results data (this contains WPM and accuracy)
         if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-            console.log('Results data found, checking for best scores...');
-            console.log('Number of results:', data.data.length);
-            
-            data.data.forEach((result, index) => {
-                console.log(`Result ${index + 1}:`, result);
-                if (result.wpm && result.wpm > highestWpm) {
-                    highestWpm = result.wpm;
-                    console.log(`New highest WPM found: ${highestWpm}`);
+            // Find the highest WPM and accuracy from all records
+            data.data.forEach(record => {
+                if (record.wpm && record.wpm > highestWpm) {
+                    highestWpm = record.wpm;
                 }
-                if (result.acc && result.acc > highestAccuracy) {
-                    highestAccuracy = result.acc;
-                    console.log(`New highest accuracy found: ${highestAccuracy}`);
+                if (record.acc && record.acc > highestAccuracy) {
+                    highestAccuracy = record.acc;
                 }
             });
         }
-        
-        // If no results array, check for single result data (from /results/last)
-        if (data && data.data && !Array.isArray(data.data) && data.data.wpm) {
-            console.log('Single result data found:', data.data);
-            const result = data.data;
-            
-            if (result.wpm && result.wpm > highestWpm) {
-                highestWpm = result.wpm;
-                console.log(`New highest WPM found: ${highestWpm}`);
-            }
-            if (result.acc && result.acc > highestAccuracy) {
-                highestAccuracy = result.acc;
-                console.log(`New highest accuracy found: ${highestAccuracy}`);
-            }
-        }
-        
-        // If no results data, check for stats data
-        if (data && data.data && !data.data.wpm) {
-            const stats = data.data;
-            console.log('Stats data found:', stats);
-            
-            // Extract from personalBests if available
-            if (stats.personalBests && stats.personalBests.time) {
-                const timeModes = stats.personalBests.time;
-                console.log('Time modes found:', Object.keys(timeModes));
-                
-                // Check different time modes for highest WPM and accuracy
-                Object.values(timeModes).forEach(mode => {
-                    if (mode && mode.wpm) {
-                        if (mode.wpm > highestWpm) {
-                            highestWpm = mode.wpm;
-                        }
-                    }
-                    if (mode && mode.accuracy) {
-                        if (mode.accuracy > highestAccuracy) {
-                            highestAccuracy = mode.accuracy;
-                        }
-                    }
-                });
-            }
-        }
-        
-        console.log('Highest WPM found:', highestWpm);
-        console.log('Highest Accuracy found:', highestAccuracy);
-        
+
         // Update the displays with animation
         animateNumber(wpmElement, parseInt(wpmElement.textContent), highestWpm);
-        
-        // Only update accuracy if we found a value greater than 0
         if (highestAccuracy > 0) {
             const currentAccuracy = accuracyElement.textContent === '99%' ? 99 : parseFloat(accuracyElement.textContent);
             animateNumber(accuracyElement, currentAccuracy, highestAccuracy, true);
         }
     } catch (error) {
         console.log('MonkeyType API error:', error);
-        console.log('Error details:', error.message);
-        // Keep the current values if API fails
+        // Use fallback data if needed
+        const fallbackWpm = 63;
+        const fallbackAccuracy = 97.0;
+        animateNumber(wpmElement, parseInt(wpmElement.textContent), fallbackWpm);
+        animateNumber(accuracyElement, 0, fallbackAccuracy, true);
     }
 }
 
