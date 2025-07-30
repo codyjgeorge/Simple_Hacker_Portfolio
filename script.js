@@ -295,7 +295,7 @@ async function fetchMonkeyTypeStats() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                endpoint: 'https://api.monkeytype.com/users/personalBests?mode=words&mode2=25',
+                endpoint: 'https://api.monkeytype.com/users/personalBests',
                 method: 'GET'
             })
         });
@@ -305,17 +305,28 @@ async function fetchMonkeyTypeStats() {
         }
 
         const data = await response.json();
-        // Parse data - API returns an array of personal best records
+        // Parse data - API returns personal bests organized by mode
         let highestWpm = 0;
         let highestAccuracy = 0;
-        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-            // Find the highest WPM and accuracy from all records
-            data.data.forEach(record => {
-                if (record.wpm && record.wpm > highestWpm) {
-                    highestWpm = record.wpm;
-                }
-                if (record.acc && record.acc > highestAccuracy) {
-                    highestAccuracy = record.acc;
+        
+        if (data && data.data) {
+            // Check all test modes for the highest WPM and accuracy
+            const modes = ['time', 'words', 'quote', 'zen', 'custom'];
+            
+            modes.forEach(mode => {
+                if (data.data[mode]) {
+                    Object.values(data.data[mode]).forEach(modeData => {
+                        if (Array.isArray(modeData)) {
+                            modeData.forEach(record => {
+                                if (record.wpm && record.wpm > highestWpm) {
+                                    highestWpm = record.wpm;
+                                }
+                                if (record.acc && record.acc > highestAccuracy) {
+                                    highestAccuracy = record.acc;
+                                }
+                            });
+                        }
+                    });
                 }
             });
         }
