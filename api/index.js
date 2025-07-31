@@ -8,15 +8,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Configure CORS to allow your GitHub Pages domain
-const allowedOrigins = {'https://codyjgeorge.github.io'}
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
             callback(new Error('Not allowed by CORS'));
         }
-    },
+    ,
     credentials: true,
     optionsSuccessStatus: 200
 }));
@@ -25,7 +21,7 @@ app.use(express.json());
 // Options Handler for MonkeyType API
 app.options('/api/monkeytype', (req, res) => {
     console.log('OPTIONS request received for /api/monkeytype');
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Origin', '*');
 });
 
 // Proxy endpoint (POST Handler) for MonkeyType API
@@ -34,7 +30,6 @@ app.post('/api/monkeytype', async (req, res) => {
     const { endpoint, method = 'GET', body } = req.body;
 
     console.log('Received request:', { endpoint, method, body });
-    console.log('API Key available:', !!process.env.MONKEYTYPE_API_KEY);
 
     try {
         const headers = {
