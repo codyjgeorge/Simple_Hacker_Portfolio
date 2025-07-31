@@ -9,28 +9,12 @@ const PORT = process.env.PORT || 3001;
 
 // Configure CORS to allow your GitHub Pages domain
 app.use(cors({
-    origin: (origin, callback) => {
-            callback(new Error('Not allowed by CORS'));
-        }
-    ,
-    credentials: true,
-    optionsSuccessStatus: 200
+    origin: true
 }));
 app.use(express.json());
-
-// Options Handler for MonkeyType API
-app.options('/api/monkeytype', (req, res) => {
-    console.log('OPTIONS request received for /api/monkeytype');
-  res.header('Access-Control-Allow-Origin', '*');
-});
-
 // Proxy endpoint (POST Handler) for MonkeyType API
-app.post('/api/monkeytype', async (req, res) => {
+app.get('/', async (req, res) => {
     
-    const { endpoint, method = 'GET', body } = req.body;
-
-    console.log('Received request:', { endpoint, method, body });
-
     try {
         const headers = {
             'Authorization': `ApeKey ${process.env.MONKEYTYPE_API_KEY}`,
@@ -40,10 +24,9 @@ app.post('/api/monkeytype', async (req, res) => {
         console.log('Making request to:', endpoint);
         console.log('Headers:', { ...headers, Authorization: 'ApeKey [REDACTED]' });
 
+                const endpoint = 'https://api.monkeytype.com/users/personalBests?mode=time&mode2=60';
         const response = await fetch(endpoint, {
-            method,
             headers,
-            body: method === 'POST' ? JSON.stringify(body) : undefined,
         });
 
         console.log('MonkeyType API response status:', response.status);

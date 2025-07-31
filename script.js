@@ -291,14 +291,7 @@ async function fetchMonkeyTypeStats() {
 
     try {
         // Use the backend proxy to fetch MonkeyType personal bests for the user
-        const response = await fetch('https://monkeytypebackend.vercel.app', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                endpoint: 'https://api.monkeytype.com/users/personalBests?mode=time&mode2=60',
-                method: 'GET'
-            })
-        });
+        const response = await fetch('https://monkeytypebackend.vercel.app');
 
         if (!response.ok) {
             throw new Error(`Failed to fetch MonkeyType personal bests: ${response.status}`);
