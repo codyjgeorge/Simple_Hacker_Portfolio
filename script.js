@@ -321,8 +321,8 @@ async function fetchMonkeyTypeStats() {
     } catch (error) {
         console.log('MonkeyType API error:', error);
         // Use fallback data if needed
-        const fallbackWpm = 63;
-        const fallbackAccuracy = 97.0;
+        const fallbackWpm = 83;
+        const fallbackAccuracy = 99.0;
         animateNumber(wpmElement, parseInt(wpmElement.textContent), fallbackWpm);
         animateNumber(accuracyElement, 0, fallbackAccuracy, true);
     }
